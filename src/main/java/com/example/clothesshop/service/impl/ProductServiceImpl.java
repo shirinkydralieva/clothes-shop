@@ -5,7 +5,9 @@ import com.example.clothesshop.entity.Manufacturer;
 import com.example.clothesshop.entity.Product;
 import com.example.clothesshop.entity.Salesman;
 import com.example.clothesshop.exception.NotFoundException;
+import com.example.clothesshop.mapper.ProductMapper;
 import com.example.clothesshop.repository.ProductRepository;
+import com.example.clothesshop.repository.SalesmanRepository;
 import com.example.clothesshop.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,79 +22,30 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class ProductServiceImpl implements ProductService {
-
     private final ProductRepository productRepository;
-
+    private final SalesmanRepository salesmanRepository;
+    private final ProductMapper productMapper;
     @Override
-    public ProductDto createProduct(ProductDto model) {
-        Product product = Product.builder()
-                .name(model.getName())
-                .price(model.getPrice())
-                .color(model.getColor())
-                .size(model.getSize())
-                .description(model.getDescription())
-                .manufacturer(Manufacturer.builder().id(model.getManufacturerId()).build())
-                .salesman(new Salesman(model.getSalesmanId()))
-                .quantity(model.getQuantity())
-                .build();
-        try {
-            productRepository.save(product);
-        } catch (Exception e){
-            log.error(e.getStackTrace().toString());
-        }
-        return model;
+    public ProductDto createProduct(ProductDto productDto) {
+        Product product = productRepository.save(productMapper.toEntity(productDto));
+        return productMapper.toDto(product);
     }
 
     @Override
     public ProductDto findById(Long id) {
         Product product = productRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("Product not found with id"+ id));
-        ProductDto model = ProductDto.builder()
-                .id(product.getId())
-                .color(product.getColor())
-                .description(product.getDescription())
-                .price(product.getPrice())
-                .manufacturerId(product.getManufacturer().getId())
-                .size(product.getSize())
-                .name(product.getName())
-                .salesmanId(product.getSalesman().getId())
-                .quantity(product.getQuantity())
-                .build();
-        return model;
+        return productMapper.toDto(product);
     }
 
     @Override
     public List<ProductDto> getAll() {
-        List<Product> products = productRepository.findAll();
-        return getProductDtos(products);
+        return productRepository.findAll().stream().map(productMapper::toDto).toList();
     }
 
     @Override
     public List<ProductDto> getAllByManufacturerId(Long manufacturerId) {
-        List<Product> products = productRepository.getProductsByManufacturerId(manufacturerId);
-        return getProductDtos(products);
+        return productMapper.toDtoList(productRepository.getProductsByManufacturerId(manufacturerId));
     }
-
-    private List<ProductDto> getProductDtos(List<Product> products) {
-        List<ProductDto> models = new ArrayList<>();
-        for (Product product: products){
-            ProductDto model = ProductDto.builder()
-                    .id(product.getId())
-                    .color(product.getColor())
-                    .description(product.getDescription())
-                    .price(product.getPrice())
-                    .manufacturerId(product.getManufacturer().getId())
-                    .size(product.getSize())
-                    .name(product.getName())
-                    .quantity(product.getQuantity())
-                    .build();
-            if (product.getSalesman() != null){
-                model.setSalesmanId(product.getSalesman().getId());
-            }
-            models.add(model);
-        }
-        return models;
-    }
-
     @Override
     public void deleteProductById(Long id) throws NotFoundException {
         Product product = productRepository.findById(id).orElseThrow(()-> new NotFoundException("Product not found"));
@@ -101,8 +54,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDto> findProductsByCriteria(Double price, List<String> manufacturers, List<String> color) {
-        List<Product> products = productRepository.findProductsByPriceGreaterThanAndManufacturersInAndColorsIn(price,manufacturers,color);
-        return getProductDtos(products);
+        return productRepository.findProductsByPriceGreaterThanAndManufacturersInAndColorsIn(price,manufacturers,color).stream().map(productMapper::toDto).toList();
     }
 
     @Override
@@ -111,11 +63,53 @@ public class ProductServiceImpl implements ProductService {
        productRepository.save(product);
     }
 
-
     @Override
     public List<ProductDto> getProductsByColor(String color) {
-        List<Product> products = productRepository.getProductsByColor(color);
-        return getProductDtos(products);
+        return productRepository.getProductsByColor(color).stream().map(productMapper::toDto).toList();
+    }
+//4
+    @Override
+    public List<ProductDto> getAllBySalesman(Long salesmanId) throws NotFoundException {
+        Salesman salesman = salesmanRepository.findById(salesmanId).orElseThrow(()-> new NotFoundException("Salesman not found with id:" + salesmanId));
+        List<Product> products = productRepository.findAll().stream().filter(product -> product.getSalesman() == salesman).toList();
+        return productMapper.toDtoList(products);
+    }
+//5
+    public Long countAllBySalesman(Long salesmanId) throws NotFoundException {
+        Salesman salesman = salesmanRepository.findById(salesmanId).orElseThrow(()-> new NotFoundException("Salesman not found with id:" + salesmanId));
+        List<Product> products = productRepository.findAll().stream().filter(product -> product.getSalesman() == salesman).toList();
+        return (long) products.size();
+    }
+//6
+    public Double getPriceBySalesman(Long productId, Long salesmanId) throws NotFoundException {
+        Salesman salesman = salesmanRepository.findById(salesmanId).orElseThrow(()-> new NotFoundException("Salesman not found with id:" + salesmanId));
+        Product product = productRepository.findProductByIdAndSalesmanId(productId, salesmanId).orElseThrow(()-> new NotFoundException("Product not found"));
+        return product.getPrice();
+    }
+//7
+    public Double countAllPriceBySalesman(Long salesmanId) throws NotFoundException {
+        Salesman salesman = salesmanRepository.findById(salesmanId).orElseThrow(()-> new NotFoundException("Salesman not found with id:" + salesmanId));
+        List<Product> products = productRepository.findAll().stream().filter(product -> product.getSalesman() == salesman).toList();
+        return products.stream().mapToDouble(Product::getPrice).sum();
     }
 
+    //8
+    public List<Manufacturer> getAllManufacturesBySalesman(Long salesmanId) throws NotFoundException {
+        Salesman salesman = salesmanRepository.findById(salesmanId).orElseThrow(()-> new NotFoundException("Salesman not found with id:" + salesmanId));
+        List<Product> products = productRepository.findAll().stream().filter(product -> product.getSalesman() == salesman).toList();
+        return products.stream().map(Product::getManufacturer).toList();
+    }
+    //9
+    public List<String> getAllProductsNameBySalesman(Long salesmanId) throws NotFoundException {
+        Salesman salesman = salesmanRepository.findById(salesmanId).orElseThrow(()-> new NotFoundException("Salesman not found with id:" + salesmanId));
+        List<Product> products = productRepository.findAll().stream().filter(product -> product.getSalesman() == salesman).toList();
+        return products.stream().map(Product::getName).map(product -> product + "s").toList();
+    }
+
+    //10
+    public List<Integer> getAllProductsPriceBySalesmanWithDiscount(Long salesmanId) throws NotFoundException {
+        Salesman salesman = salesmanRepository.findById(salesmanId).orElseThrow(()-> new NotFoundException("Salesman not found with id:" + salesmanId));
+        List<Product> products = productRepository.findAll().stream().filter(product -> product.getSalesman() == salesman).toList();
+        return products.stream().map(product -> (int) product.getPrice()).map(price -> (int) (price * 0.5)).toList();
+    }
 }

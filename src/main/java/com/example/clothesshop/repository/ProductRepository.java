@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product,Long> {
@@ -34,4 +35,6 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
             @Param("manufacturers") List<String> manufacturers,
             @Param("colors") List<String> color
     );
+
+    Optional<Product> findProductByIdAndSalesmanId(Long productId,Long salesmanId);
 }

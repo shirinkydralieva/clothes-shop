@@ -27,4 +27,8 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "salesman_id")
     private Salesman salesman;
+
+    public Product(Long id) {
+        this.id = id;
+    }
 }

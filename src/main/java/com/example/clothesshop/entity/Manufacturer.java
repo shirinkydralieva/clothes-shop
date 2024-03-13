@@ -21,5 +21,9 @@ public class Manufacturer {
     private String name;
     private String address;
     private String contactInfo;
+
+    public Manufacturer(Long id) {
+        this.id = id;
+    }
 }
 

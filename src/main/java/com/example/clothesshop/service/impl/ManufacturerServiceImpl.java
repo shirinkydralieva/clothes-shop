@@ -3,6 +3,7 @@ package com.example.clothesshop.service.impl;
 import com.example.clothesshop.dto.ManufacturerDto;
 import com.example.clothesshop.entity.Manufacturer;
 import com.example.clothesshop.entity.Product;
+import com.example.clothesshop.mapper.ManufacturerMapper;
 import com.example.clothesshop.repository.ManufacturerRepository;
 import com.example.clothesshop.service.ManufacturerService;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,47 +21,22 @@ import java.util.Optional;
 public class ManufacturerServiceImpl implements ManufacturerService {
 
     private final ManufacturerRepository manufacturerRepository;
+    private final ManufacturerMapper manufacturerMapper;
     @Override
-    public ManufacturerDto createManufacturer(ManufacturerDto model) {
-        Manufacturer manufacturer = Manufacturer.builder()
-                .name(model.getName())
-                .contactInfo(model.getContactInfo())
-                .address(model.getAddress())
-                .build();
-        try {
-            manufacturerRepository.save(manufacturer);
-        }catch (Exception e){
-            log.error(e.getStackTrace().toString());
-        }
-        return model;
+    public ManufacturerDto createManufacturer(ManufacturerDto manufacturerDto) {
+        Manufacturer manufacturer = manufacturerMapper.toEntity(manufacturerDto);
+       return manufacturerMapper.toDto(manufacturerRepository.save(manufacturer));
     }
 
     @Override
     public ManufacturerDto findById(Long id) {
         Manufacturer manufacturer = manufacturerRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Manufacturer not found with id "+ id));
-        ManufacturerDto model = ManufacturerDto.builder()
-                .id(manufacturer.getId())
-                .name(manufacturer.getName())
-                .contactInfo(manufacturer.getContactInfo())
-                .address(manufacturer.getAddress())
-                .build();
-        return model;
+        return manufacturerMapper.toDto(manufacturer);
     }
 
     @Override
     public List<ManufacturerDto> getAllManufacturers() {
-        List<Manufacturer> manufacturers = manufacturerRepository.findAll();
-        List<ManufacturerDto> models = new ArrayList<>();
-        for (Manufacturer manufacturer : manufacturers) {
-            ManufacturerDto model = ManufacturerDto.builder()
-                    .id(manufacturer.getId())
-                    .name(manufacturer.getName())
-                    .contactInfo(manufacturer.getContactInfo())
-                    .address(manufacturer.getAddress())
-                    .build();
-            models.add(model);
-        }
-        return models;
+        return manufacturerMapper.toDtoList(manufacturerRepository.findAll());
     }
 
     @Override

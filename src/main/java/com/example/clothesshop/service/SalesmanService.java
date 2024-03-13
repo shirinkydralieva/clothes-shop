@@ -6,13 +6,11 @@ import com.example.clothesshop.entity.Salesman;
 import java.util.List;
 
 public interface SalesmanService {
-    SalesmanDto createSalesman(SalesmanDto salesman);
+    SalesmanDto create(SalesmanDto salesman);
 
     SalesmanDto getById(long id);
 
     List<SalesmanDto> getAll();
-
-    void deleteSalesmanById(Long id);
 
     void deleteById(Long id);
 }

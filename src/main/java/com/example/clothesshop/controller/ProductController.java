@@ -2,6 +2,7 @@ package com.example.clothesshop.controller;
 
 import com.example.clothesshop.dto.ManufacturerDto;
 import com.example.clothesshop.dto.ProductDto;
+import com.example.clothesshop.entity.Manufacturer;
 import com.example.clothesshop.entity.Product;
 import com.example.clothesshop.exception.NotFoundException;
 import com.example.clothesshop.service.ProductService;
@@ -179,6 +180,75 @@ import java.util.List;
         {
             List<ProductDto> products = productService.findProductsByCriteria(price,manufacturers,colors);
             return new ResponseEntity<>(products, HttpStatus.OK);
+        }
+        @GetMapping("/salesman/{salesmanId}")
+        public ResponseEntity<List<ProductDto>> getAllBySalesman(@PathVariable Long salesmanId){
+            try {
+                List<ProductDto> products = productService.getAllBySalesman(salesmanId);
+                return new ResponseEntity<>(products, HttpStatus.OK);
+            } catch (NotFoundException e){
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }
+
+        @GetMapping("/salesman/count")
+        public ResponseEntity<Long> countAllBySalesman(@RequestParam Long salesmanId){
+            try {
+                Long count = productService.countAllBySalesman(salesmanId);
+                return new ResponseEntity<>(count, HttpStatus.OK);
+            } catch (NotFoundException e){
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }
+
+        @GetMapping("/salesman/productPrice")
+        public ResponseEntity<Double> getPriceBySalesman(@RequestParam Long productId, @RequestParam Long salesmanId){
+            try {
+                Double price = productService.getPriceBySalesman(productId, salesmanId);
+                return new ResponseEntity<>(price, HttpStatus.OK);
+            } catch (NotFoundException e){
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }
+
+        @GetMapping("/salesman/totalPrice")
+        public ResponseEntity<Double> countAllPriceBySalesman(@RequestParam Long salesmanId){
+            try {
+                Double totalprice = productService.countAllPriceBySalesman(salesmanId);
+                return new ResponseEntity<>(totalprice, HttpStatus.OK);
+            } catch (NotFoundException e){
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }
+
+        @GetMapping("/salesman/manufacturers")
+        public ResponseEntity<List<Manufacturer>> getAllManufacturesBySalesman(@RequestParam Long salesmanId){
+            try {
+                List<Manufacturer> manufacturers = productService.getAllManufacturesBySalesman(salesmanId);
+                return new ResponseEntity<>(manufacturers, HttpStatus.OK);
+            } catch (NotFoundException e){
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }
+
+        @GetMapping("/salesman/productsName")
+        public ResponseEntity<List<String>> getAllProductsNameBySalesman(@RequestParam Long salesmanId){
+            try {
+                List<String> productsName = productService.getAllProductsNameBySalesman(salesmanId);
+                return new ResponseEntity<>(productsName, HttpStatus.OK);
+            } catch (NotFoundException e){
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        }
+
+        @GetMapping("/salesman/priceDiscount")
+        public ResponseEntity<List<Integer>> getAllProductsPriceBySalesmanWithDiscount(@RequestParam Long salesmanId){
+            try {
+                List<Integer> productsName = productService.getAllProductsPriceBySalesmanWithDiscount(salesmanId);
+                return new ResponseEntity<>(productsName, HttpStatus.OK);
+            } catch (NotFoundException e){
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
         }
 
 }

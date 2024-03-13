@@ -4,6 +4,7 @@ import com.example.clothesshop.dto.BuyerDto;
 import com.example.clothesshop.entity.Buyer;
 import com.example.clothesshop.entity.Product;
 import com.example.clothesshop.exception.NotFoundException;
+import com.example.clothesshop.mapper.BuyerMapper;
 import com.example.clothesshop.repository.BuyerRepository;
 import com.example.clothesshop.repository.ProductRepository;
 import com.example.clothesshop.service.BuyerService;
@@ -20,42 +21,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BuyerServiceImpl implements BuyerService {
     private final BuyerRepository buyerRepository;
-    private final ProductService productService;
+    private final BuyerMapper buyerMapper;
     @Override
-    public BuyerDto create(BuyerDto model) {
-        Buyer buyer = Buyer.builder()
-                .fullName(model.getFullName())
-                .build();
-        try {
-            buyerRepository.save(buyer);
-        } catch (Exception e){
-            log.error(e.getStackTrace().toString());
-        }
-        return model;
+    public BuyerDto create(BuyerDto buyerDto) {
+       Buyer buyer = buyerRepository.save(buyerMapper.toEntity(buyerDto));
+       return buyerMapper.toDto(buyer);
     }
 
     @Override
     public List<BuyerDto> getAll() {
-        List<Buyer> buyers = buyerRepository.findAll();
-        List<BuyerDto> buyerDtos = new ArrayList<>();
-        for (Buyer buyer: buyers){
-            BuyerDto buyerDto = BuyerDto.builder()
-                    .id(buyer.getId())
-                    .fullName(buyer.getFullName())
-                    .build();
-            buyerDtos.add(buyerDto);
-        }
-        return buyerDtos;
+        return buyerMapper.toDtoList(buyerRepository.findAll());
+
     }
 
     @Override
     public BuyerDto getById(Long id) throws NotFoundException {
         Buyer buyer = buyerRepository.findById(id).orElseThrow(() -> new NotFoundException("Buyer not found with:" + id));
-        BuyerDto buyerDto = BuyerDto.builder()
-                .id(buyer.getId())
-                .fullName(buyer.getFullName())
-                .build();
-        return buyerDto;
+        return buyerMapper.toDto(buyer);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.example.clothesshop.service;
 
 import com.example.clothesshop.dto.ProductDto;
+import com.example.clothesshop.entity.Manufacturer;
 import com.example.clothesshop.entity.Product;
 import com.example.clothesshop.exception.NotFoundException;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +27,11 @@ public interface ProductService {
 
     void decreaseStockQuantity(Product product, Integer quantity);
     List<ProductDto> getProductsByColor(String color);
+    List<ProductDto> getAllBySalesman(Long salesmanId) throws NotFoundException;
+    Long countAllBySalesman(Long salesmanId) throws NotFoundException;
+    Double getPriceBySalesman(Long salesmanId, Long productId) throws NotFoundException;
+    Double countAllPriceBySalesman(Long salesmanId) throws NotFoundException;
+    List<Manufacturer> getAllManufacturesBySalesman(Long salesmanId) throws NotFoundException;
+    List<String> getAllProductsNameBySalesman(Long salesmanId) throws NotFoundException;
+    List<Integer> getAllProductsPriceBySalesmanWithDiscount(Long salesmanId) throws NotFoundException;
 }

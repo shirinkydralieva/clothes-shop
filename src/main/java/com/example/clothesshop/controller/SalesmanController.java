@@ -92,7 +92,7 @@ public class SalesmanController {
     )
     @PostMapping()
     public ResponseEntity<SalesmanDto> create(@RequestBody SalesmanDto model){
-        SalesmanDto salesman = service.createSalesman(model);
+        SalesmanDto salesman = service.create(model);
         return ResponseEntity.status(HttpStatus.CREATED).body(salesman);
     }
 
